@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface LeaderboardEntry {
   user_id: string;
@@ -7,28 +7,28 @@ interface LeaderboardEntry {
   username?: string;
 }
 
-interface Props {
+interface LeaderboardTableProps {
   entries: LeaderboardEntry[];
 }
 
-const LeaderboardTable: React.FC<Props> = ({ entries }) => {
+const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ entries }) => {
   return (
-    <table className="leaderboard-table">
+    <table className="w-full text-left border-collapse table-auto">
       <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Username</th>
-          <th>Games Won</th>
-          <th>Total Score</th>
+        <tr className="bg-secondary">
+          <th className="p-4 border-b-2 border-border text-secondary-foreground">Rank</th>
+          <th className="p-4 border-b-2 border-border text-secondary-foreground">Player</th>
+          <th className="p-4 border-b-2 border-border text-secondary-foreground">Games Won</th>
+          <th className="p-4 border-b-2 border-border text-secondary-foreground">Total Score</th>
         </tr>
       </thead>
       <tbody>
         {entries.map((entry, index) => (
-          <tr key={entry.user_id}>
-            <td>{index + 1}</td>
-            <td>{entry.username || "Unknown User"}</td>
-            <td>{entry.games_won}</td>
-            <td>{entry.total_score}</td>
+          <tr key={entry.user_id} className="even:bg-muted/50">
+            <td className="p-4 border-b border-border">{index + 1}</td>
+            <td className="p-4 border-b border-border">{entry.username}</td>
+            <td className="p-4 border-b border-border">{entry.games_won}</td>
+            <td className="p-4 border-b border-border">{entry.total_score}</td>
           </tr>
         ))}
       </tbody>

@@ -1,138 +1,96 @@
-import React, { useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import AuthGuard from "./components/AuthGuard";
-import { useAuth } from "./auth/useAuth";
+import { Routes, Route, Link } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import AuthGuard from './components/AuthGuard';
+import LeaderboardPage from './pages/LeaderboardPage';
+import AdminPage from './pages/AdminPage';
+import GamePage from './pages/GamePage';
+import { useAuth } from './auth/useAuth';
+import { useState, useEffect } from 'react';
 
-// Game components
-import useGameLogic from "./hooks/useGameLogic";
-import CaseSelector from "./components/CaseSelector";
-import GameBoard from "./components/GameBoard";
-import ResultScreen from "./components/ResultScreen";
-import LeaderboardPage from "./pages/LeaderboardPage";
-import AdminPage from "./pages/AdminPage";
+// Theme Switcher Component
+const ThemeSwitcher = () => {
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
-// Placeholder for the main game content page
-const HomePage = () => {
+    useEffect(() => {
+        const root = window.document.documentElement;
+        if (theme === 'dark') {
+            root.classList.add('dark');
+        } else {
+            root.classList.remove('dark');
+        }
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(theme === 'dark' ? 'light' : 'dark');
+    };
+
+    return (
+        <button onClick={toggleTheme} className="p-2 rounded-md bg-secondary text-secondary-foreground">
+            {theme === 'dark' ? 'Light' : 'Dark'} Mode
+        </button>
+    );
+};
+
+const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <div>
-      <h1>Welcome to TruthEyes!</h1>
-      {user ? (
-        <>
-          <p>Logged in as {user.email}</p>
-          <button onClick={logout}>Logout</button>
-          <nav>
-            <Link to="/game">Start Game</Link> {" | "}
-            <Link to="/leaderboard">Leaderboard</Link> {" | "}
-            <Link to="/admin">Admin</Link>
-          </nav>
-        </>
-      ) : (
-        <nav>
-          <Link to="/login">Login</Link> | <Link to="/signup">Sign Up</Link>{" "}
-          {" | "}
-          <Link to="/leaderboard">Leaderboard</Link>
-        </nav>
-      )}
-    </div>
-  );
-};
-
-// Placeholder for the Game page
-const GamePage = () => {
-  const {
-    gameState,
-    currentCase,
-    playerScore,
-    message,
-    loading,
-    submitting,
-    error,
-    cases,
-    selectCase,
-    submitAnswer,
-    resetGame,
-    fetchCases,
-  } = useGameLogic();
-
-  useEffect(() => {
-    // Optionally, if cases need to be re-fetched when GamePage mounts
-    // For now, useGameLogic handles initial fetch
-  }, [fetchCases]);
-
-  if (loading) {
-    return <div>Loading game...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  return (
-    <div className="game-container">
-      {gameState === "SELECT_CASE" && (
-        <CaseSelector
-          cases={cases}
-          selectCase={selectCase}
-          loading={loading}
-          error={error}
-        />
-      )}
-      {gameState === "IN_GAME" && currentCase && (
-        <GameBoard
-          currentCase={currentCase}
-          submitAnswer={submitAnswer}
-          submitting={submitting}
-        />
-      )}
-      {gameState === "RESULT" && (
-        <ResultScreen
-          message={message}
-          playerScore={playerScore}
-          resetGame={resetGame}
-          playAgain={() => selectCase(currentCase!.id)} // Assuming currentCase is not null here
-        />
-      )}
-    </div>
+    <header className="p-4 bg-card text-card-foreground shadow-md">
+      <nav className="flex justify-between items-center">
+        <Link to="/" className="text-xl font-bold text-primary">TruthEyes</Link>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <>
+              <span className="text-muted-foreground">{user.email}</span>
+              <Link to="/leaderboard" className="hover:text-primary transition-colors">Leaderboard</Link>
+              <Link to="/admin" className="hover:text-primary transition-colors">Admin</Link>
+              <button onClick={logout} className="p-2 rounded-md bg-destructive text-destructive-foreground">Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/leaderboard" className="hover:text-primary transition-colors">Leaderboard</Link>
+              <Link to="/login" className="hover:text-primary transition-colors">Login</Link>
+              <Link to="/signup" className="hover:text-primary transition-colors">Sign Up</Link>
+              <Link to="/game" className="hover:text-primary transition-colors">Game</Link>
+            </>
+          )}
+          <ThemeSwitcher />
+        </div>
+      </nav>
+    </header>
   );
 };
 
 function App() {
+  useEffect(() => {
+    // Set the theme on initial load
+    const theme = localStorage.getItem('theme') || 'light';
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
   return (
-    <Routes>
-      <Route path="/leaderboard" element={<LeaderboardPage />} />
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      {/* Protected routes */}
-      <Route
-        path="/game"
-        element={
-          <AuthGuard>
-            <GamePage />
-          </AuthGuard>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <AuthGuard>
-            {/* AdminPage is imported dynamically to avoid circular imports */}
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore */}
-            <React.Suspense fallback={<div>Loading admin...</div>}>
-              {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-              {/* @ts-ignore */}
+    <div className="bg-background min-h-screen text-foreground">
+      <Header />
+      <Routes>
+        <Route path="/" element={<GamePage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/game" element={<GamePage />} />
+        <Route
+          path="/admin"
+          element={
+            <AuthGuard>
               <AdminPage />
-            </React.Suspense>
-          </AuthGuard>
-        }
-      />
-      {/* Add other protected routes here */}
-    </Routes>
+            </AuthGuard>
+          }
+        />
+      </Routes>
+    </div>
   );
 }
 

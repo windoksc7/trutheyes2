@@ -77,18 +77,19 @@ const LeaderboardPage: React.FC = () => {
     fetchLeaderboard();
   }, []);
 
-  if (loading) return <div>Loading leaderboard...</div>;
-
   return (
-    <div className="leaderboard-page">
-      <h2>Leaderboard (Top 10)</h2>
-      {error && <ErrorBanner message={error} onRetry={fetchLeaderboard} />}
-
-      {leaderboard.length === 0 ? (
-        <p>No players on the leaderboard yet. Play some games to get ranked!</p>
-      ) : (
-        <LeaderboardTable entries={leaderboard} />
-      )}
+    <div className="min-h-screen bg-background flex flex-col items-center pt-10">
+      <div className="w-full max-w-4xl p-8 bg-card rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-card-foreground mb-6 text-center">Leaderboard (Top 10)</h2>
+        {loading && <p className="text-center text-muted-foreground">Loading leaderboard...</p>}
+        {error && <ErrorBanner message={error} onRetry={fetchLeaderboard} />}
+        {!loading && leaderboard.length === 0 && (
+          <p className="text-center text-muted-foreground">No players on the leaderboard yet. Play some games to get ranked!</p>
+        )}
+        {!loading && leaderboard.length > 0 && (
+          <LeaderboardTable entries={leaderboard} />
+        )}
+      </div>
     </div>
   );
 };
